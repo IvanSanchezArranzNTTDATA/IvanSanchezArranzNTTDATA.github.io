@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dummy Pedidos</title>
+
+    <script>
+      setTimeout(() => {
+        var firmaDigitalIframeElement = document.getElementById('firmaIframe');
+        var messagesContainer = document.getElementById('messages-list');
+        var isAndroidApp = typeof window.AndroidApp === 'object';
+        var isIOSApp = typeof window.webkit === 'object' && typeof window.webkit.messageHandlers.IOSApp === 'object';
+        var router_token;
+        window.addEventListener('message', receiveMessage, false);
+
+        window.messageFromIkki = data => {
+          console.log('Message from Ikki:', data);
+          alert(data);
+        };
+
+        document.getElementById('button-autoi-chat').addEventListener('click', function () {
+          appendMessageAndSend(null, {
+            action: 'help',
+            message: 'open-chat',
+            chat_id: 'autoi',
+            order_id: '123456789'
+          });
+        });
+
+        document.getElementById('button-close-firma').addEventListener('click', function () {
+          appendMessageAndSend(null, { action: 'close', message: 'close-firma' });
+        });
+
+        document.getElementById('button-event-tel').addEventListener('click', function () {
+          appendMessageAndSend(null, {
+            action: 'help',
+            message: 'open-tel',
+            tel: '22123'
+          });
+        });
+
+        document.getElementById('button-slid').addEventListener('click', function () {
+          const data = {
+            'userConfig': document.getElementById('input-user').value,
+            'passUserConfig': document.getElementById('input-pass').value,
+            'passGpon': document.getElementById('input-slid').value
+          };
+
+          appendMessageAndSend(null, {
+            action: 'router',
+            message: 'router-slid',
+            data: window.btoa(JSON.stringify(data)).split('').reverse().join('')
+          });
+
+          // fetch('https://192.168.0.1/app/login', {
+          //   method: 'GET',
+          //   headers: {
+          //     'Content-Type': 'application/json',
+          //     // 'rejectUnauthorized': 'false',
+          //     'Accept-Language': 'es-ES,es;q=0.9',
+          //     Authorization: `Basic ${window.btoa(
+          //       `${document.getElementById('input-user').value}:${document.getElementById('input-pass').value}`
+          //     )}`
+          //   }
+          // })
+          //   .then(res => {
+          //     let newRes;
+          //     try {
+          //       newRes = res.json();
+          //     } catch (error) {
+          //       newRes = res.text();
+          //     }
+          //     return newRes;
+          //   })
+          //   .then(data => {
+          //     console.log('Login complete! response:', data);
+          //     router_token = data.auth_token;
+          //   })
+          //   .catch(err => {
+          //     console.error('Login ERROR!', err);
+          //   });
+        });
+
+        // document.getElementById('button-slid-send').addEventListener('click', function () {
+        //   fetch('https://192.168.0.1/app/set_GPON', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({
+        //       auth_token: router_token,
+        //       PLOAM_Password: document.getElementById('input-slid').value
+        //     })
+        //   })
+        //     .then(res => {
+        //       {
+        //         let newRes;
+        //         try {
+        //           newRes = res.json();
+        //         } catch (error) {
+        //           newRes = res.text();
+        //         }
+        //         return newRes;
+        //       }
+        //     })
+        //     .then(data => {
+        //       debugger;
+        //       console.log('SLID send complete! response:', data);
+        //     })
+        //     .catch(err => {
+        //       console.error('SLID send ERROR!', err);
+        //     });
+        // });
+
+        function receiveMessage(event) {
+          if (firmaDigitalIframeElement && event && event.source === firmaDigitalIframeElement.contentWindow) {
+            console.log('Message received from firmaDigitalIframeElement:', event);
+            try {
+              const eventData = JSON.parse(event.data);
+              if (eventData && eventData.message) {
+                appendMessageAndSend(eventData, eventData, true);
+              }
+            } catch (error) {
+              console.error('Error parsing postMessage from firmaDigitalIframeElement', event.data, error);
+            }
+          } else if (event && event.source !== window) {
+            // Received message from somewhere else
+            try {
+              const eventData = JSON.parse(event.data);
+              if (eventData) {
+                appendMessageAndSend(eventData, null, false);
+              }
+            } catch (error) {
+              console.error('Error parsing postMessage from another source', event, error);
+            }
+          }
+        }
+
+        function appendMessageAndSend(received, sent, hideReceived) {
+          // Append text to msg container
+          messagesContainer.innerHTML =
+            `<div>` +
+            `<h4>At ${new Date().toLocaleString()}:</h4>` +
+            `${received && !hideReceived ? `<p> > <b>Received:</b> ${JSON.stringify(received)}</p>` : ''}` +
+            `${sent ? `<p> > <b>Sent to ${isAndroidApp ? 'Android' : isIOSApp ? 'iOS' : 'PM'}:</b> ${JSON.stringify(sent)}</p>` : ''}` +
+            `</div>` +
+            messagesContainer.innerHTML;
+
+          // Send message to parent
+          if (sent) {
+            postMessage(JSON.stringify(sent));
+          }
+        }
+
+        function postMessage(message, targetOrigin) {
+          targetOrigin = targetOrigin || '*';
+          var result = false;
+          try {
+            if (isAndroidApp) {
+              console.log('Enviando mensaje a Android:', message);
+              result = window.AndroidApp.postMessage(message);
+              console.log('Respuesta:', result);
+            } else if (isIOSApp) {
+              console.log('Enviando mensaje a IOS:', message);
+              result = window.webkit.messageHandlers.IOSApp.postMessage(message);
+              console.log('Respuesta:', result);
+            } else {
+              console.log('Enviando mensaje a Ikki Web:', message);
+              window.parent.postMessage(message, targetOrigin);
+              result = true;
+            }
+          } catch (err) {
+            console.error('Error enviando mensaje desde iframe a la aplicacion padre.');
+            console.error(err);
+          }
+          return result;
+        }
+      }, 1000);
+    </script>
+
+    <style>
+      .iframe-container {
+        height: 100%;
+        width: 100%;
+      }
+      iframe {
+        height: 250px;
+        width: 100%;
+        border: 1px solid red;
+      }
+      button {
+        display: block;
+        margin-bottom: 8px;
+      }
+      .button-style {
+        display: inline-block;
+        background-color: #efefef;
+        color: black;
+        margin: 0em;
+        padding: 1px 6px;
+        border: 1px solid #767676;
+        border-radius: 5px;
+        text-decoration: none;
+      }
+      .buttons-container {
+        margin-bottom: 24px;
+      }
+      #messagesContainer > div {
+        border-radius: 10px;
+        border: 1px solid black;
+        background-color: lightslategrey;
+        color: white;
+        margin-bottom: 8px;
+        padding: 0 16px;
+      }
+      #messagesContainer p {
+        word-break: break-all;
+        display: -webkit-box;
+        -webkit-line-clamp: 10;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      #messagesContainer h4 {
+        color: greenyellow;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="buttons-container">
+      <h3>Dummy Pedidos with Dummy Firma Digital iframe</h3>
+
+      <h4>Open Autoi chat event:</h4>
+      <button id="button-autoi-chat">Send 'open-chat' event</button>
+
+      <h4>Send SLID to router:</h4>
+      <div style="margin-bottom: 10px">
+        <label for="user">User:</label>
+        <input type="text" name="user" id="input-user" placeholder="User" value="admin" />
+      </div>
+      <div style="margin-bottom: 10px">
+        <label for="pass">Pass:</label>
+        <input type="text" name="pass" id="input-pass" placeholder="Pass" value="VF-ESFG824CD" />
+      </div>
+      <div style="margin-bottom: 10px">
+        <label for="slid">SLID:</label>
+        <input type="text" name="slid" id="input-slid" placeholder="SLID" value="KUSMNRFI3N7" />
+      </div>
+      <button id="button-slid">Send 'router-slid' event</button>
+
+      <h4>Call buttons:</h4>
+      <button id="button-event-tel">Send 'open-tel' event</button>
+      <a href="tel:22123" id="button-tel" class="button-style">Call via 'tel:'</a>
+
+      <h4>Close Firma/VPT from Pedidos event:</h4>
+      <button id="button-close-firma">Send 'close' event</button>
+    </div>
+    <br />
+    <div class="iframe-container">
+      <iframe id="firmaIframe" src="https://dummy-firma-digital.s3.eu-west-1.amazonaws.com/index_firma.html" frameborder="0"></iframe>
+    </div>
+    <div id="messagesContainer">
+      <h3>Messages log:</h3>
+      <div id="messages-list"></div>
+    </div>
+  </body>
+</html>
