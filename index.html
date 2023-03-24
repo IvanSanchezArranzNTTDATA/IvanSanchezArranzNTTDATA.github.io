@@ -85,7 +85,7 @@
 
         document.getElementById('button-sendEvent').addEventListener('click', function () {
           const data = document.getElementById('input-body-event').value;
-          appendMessageAndSend(null, data);
+          appendMessageAndSend(null, JSON.parse(data));
         });
 
         // document.getElementById('button-slid-send').addEventListener('click', function () {
