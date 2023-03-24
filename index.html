@@ -85,14 +85,7 @@
 
         document.getElementById('button-sendEvent').addEventListener('click', function () {
           const data = document.getElementById('input-body-event').value;
-          appendMessageAndSend(null, {
-            action: document.getElementById('input-action-event').value,
-            message: document.getElementById('input-message-event').value,
-            tipo_flujo: document.getElementById('input-flowType-event').value,
-            paso_flujo: document.getElementById('input-flowPath-event').value,
-            motivo_soporte: document.getElementById('input-supportMotive-event').value,
-            data: data
-          });
+          appendMessageAndSend(null, data);
         });
 
         // document.getElementById('button-slid-send').addEventListener('click', function () {
@@ -241,26 +234,6 @@
     <div class="buttons-container">
 
       <h3>Envio de eventos manuales:</h3>
-      <div style="margin-bottom: 10px">
-        <label for="action">Event Action:</label>
-        <input type="text" name="action" id="input-action-event" placeholder="Action" value="" />
-      </div>
-      <div style="margin-bottom: 10px">
-        <label for="message">Event Message:</label>
-        <input type="text" name="message" id="input-message-event" placeholder="Message" value="" />
-      </div>
-      <div style="margin-bottom: 10px">
-        <label for="message">Flow Type:</label>
-        <input type="text" name="message" id="input-flowType-event" placeholder="Flow Type" value="" />
-      </div>
-      <div style="margin-bottom: 10px">
-        <label for="message">Flow Path:</label>
-        <input type="text" name="message" id="input-flowPath-event" placeholder="Flow Path" value="" />
-      </div>
-      <div style="margin-bottom: 10px">
-        <label for="message">Support Motive:</label>
-        <input type="text" name="message" id="input-supportMotive-event" placeholder="Support Motive" value="" />
-      </div>
       <div style="margin-bottom: 10px">
         <label for="body">Event Body:</label>
         <input type="text" name="body" id="input-body-event" placeholder="JSON" value="" />
