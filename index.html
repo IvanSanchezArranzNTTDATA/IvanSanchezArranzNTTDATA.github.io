@@ -83,6 +83,15 @@
           //   });
         });
 
+        document.getElementById('button-sendEvent').addEventListener('click', function () {
+          const data = document.getElementById('input-body-event').value;
+          appendMessageAndSend(null, {
+            action: document.getElementById('input-action-event').value,
+            message: document.getElementById('input-message-event').value,
+            data: data
+          });
+        });
+
         // document.getElementById('button-slid-send').addEventListener('click', function () {
         //   fetch('https://192.168.0.1/app/set_GPON', {
         //     method: 'POST',
@@ -227,6 +236,22 @@
   </head>
   <body>
     <div class="buttons-container">
+
+      <h3>Envio de eventos manuales:</h3>
+      <div style="margin-bottom: 10px">
+        <label for="action">Event Action:</label>
+        <input type="text" name="action" id="input-action-event" placeholder="Action" value="" />
+      </div>
+      <div style="margin-bottom: 10px">
+        <label for="message">Event Message:</label>
+        <input type="text" name="message" id="input-message-event" placeholder="Message" value="" />
+      </div>
+      <div style="margin-bottom: 10px">
+        <label for="body">Event Body:</label>
+        <input type="text" name="body" id="input-body-event" placeholder="JSON" value="" />
+      </div>
+      <button id="button-sendEvent">Envio de evento manual</button>
+
       <h3>Dummy Pedidos with Dummy Firma Digital iframe</h3>
 
       <h4>Open Autoi chat event:</h4>
